@@ -70,7 +70,7 @@ programRouter.route('/')
                                     else return p2[sortF[0]].localeCompare(p1[sortF[0]]); });
             res.json(matched.slice(rangeFilter[0],rangeFilter[1]));
         }else{
-            console.log(programs.length);
+            console.log(programs.length);            
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');            
             res.setHeader('Content-Range',  `programs 0 - 10 / ${programs.length}`);
@@ -86,11 +86,15 @@ programRouter.route('/')
     
 })
 .post(cors.corsWithOptions,upload.single('imageFile'),(req, res, next)=>{
+    let data;
+    if(req.file){
+        const imagePath = req.file.path;
+        data = JSON.parse(req.body.datas);
+        data.image = imagePath;
+    } else {
+        data = req.body
+    }
     
-    const imagePath = req.file.path;
-    const data = JSON.parse(req.body.datas);
-    data.image = imagePath;
-
     Programs.create(data)
     .then((program)=>{
         res.statusCode = 200;
