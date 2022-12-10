@@ -8,7 +8,11 @@ var config = require('./config');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var programRouter = require('./routes/programRouter');
-var uploadRouter = require('./routes/uploadRouter');
+var studentRouter = require('./routes/studentRouter');
+var carouselRouter = require('./routes/carouselRouter');
+var feedbackRouter = require('./routes/feedbackRouter')
+var classRouter = require('./routes/classRouter');
+var stuffRouter = require('./routes/stuffRouter');
 
 const mongoose = require('mongoose');
 
@@ -35,7 +39,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/programs', programRouter);
-app.use('/imageUpload', uploadRouter);
+app.use('/students', studentRouter);
+app.use('/carousels', carouselRouter);
+app.use('/feedbacks', feedbackRouter);
+app.use('/classes', classRouter);
+app.use('/stuffs', stuffRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

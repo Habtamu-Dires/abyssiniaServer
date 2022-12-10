@@ -6,8 +6,7 @@ const Currency = mongoose.Types.Currency;
 
 const moduleSchema = new Schema({
     module:{
-        type:String,
-        required: true
+        type:String
     }},{
         timestamps:true
     })
@@ -20,7 +19,7 @@ const programSchema = new Schema({
         unique: true
     },
     image: {
-        type:String
+        type:String,
     },
     description: {
         type: String,
@@ -29,7 +28,6 @@ const programSchema = new Schema({
     modules: [moduleSchema],
     price: {
         type: Currency,
-        required: true,
         min: 0,
     },    
     duration: {
