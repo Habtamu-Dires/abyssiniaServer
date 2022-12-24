@@ -5,7 +5,6 @@ const studentSchema = new Schema({
     student: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Student',
-        unique: true,
         required:true
     }
 });

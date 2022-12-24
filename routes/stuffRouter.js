@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser =require('body-parser');
 const cors = require('./cors');
-
+const authenticate = require('../authenticate');
 const Stuffs = require('../models/stuff');
 
 const stuffRouter = express.Router();
@@ -73,7 +73,7 @@ stuffRouter.route('/')
         
       }
 })
-.post(cors.corsWithOptions,(req, res, next)=>{
+.post(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     
     Stuffs.create(req.body)
     .then((stuff)=>{
@@ -84,11 +84,11 @@ stuffRouter.route('/')
     .catch((err)=> next(err));
     
 })
-.put(cors.corsWithOptions,(req, res, next)=>{
+.put(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     res.statusCode = 403;
     res.end("PUT operation not supported on /stuffs");
 })
-.delete(cors.corsWithOptions,(req, res, next)=>{
+.delete(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     let arrayId =  JSON.parse(req.query.filter).id;
      for(let id of arrayId){
         Stuffs.findByIdAndRemove(id)
@@ -119,11 +119,11 @@ stuffRouter.route('/:stuffId')
     })
     .catch((err)=> next(err));
 })
-.post(cors.corsWithOptions,(req,res, next)=>{
+.post(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req,res, next)=>{
     res.statusCode = 403;
     res.end('POST operation not supported on /stuffs/' + req.params.stuffId);
 })
-.put(cors.corsWithOptions,(req, res, next)=>{
+.put(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     console.log(req.body)
     Stuffs.findByIdAndUpdate(req.params.stuffId, {
         $set: req.body
@@ -139,7 +139,7 @@ stuffRouter.route('/:stuffId')
     .catch((err)=> next(err));
    
 })
-.delete(cors.corsWithOptions, (req, res, next) =>{
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) =>{
     Stuffs.findByIdAndRemove(req.params.stuffId)
     .then((resp)=>{
         res.statusCode = 200;

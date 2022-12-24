@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser =require('body-parser');
 const cors = require('./cors');
-
+const authenticate = require('../authenticate');
 const Students = require('../models/students');
 
 const studentRouter = express.Router();
@@ -74,7 +74,7 @@ studentRouter.route('/')
         
       }
 })
-.post(cors.corsWithOptions,(req, res, next)=>{
+.post(cors.corsWithOptions, (req, res, next)=>{
     
     Students.create(req.body)
     .then((student)=>{
@@ -85,12 +85,14 @@ studentRouter.route('/')
     .catch((err)=> next(err));
     
 })
-.put(cors.corsWithOptions,(req, res, next)=>{
+.put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     res.statusCode = 403;
     res.end("PUT operation not supported on /students");
 })
-.delete(cors.corsWithOptions,(req, res, next)=>{
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     let arrayId =  JSON.parse(req.query.filter).id;
+    console.log("here")
+    console.log(arrayId)
      for(let id of arrayId){
         Students.findByIdAndRemove(id)
         .then(res=>{
@@ -120,11 +122,11 @@ studentRouter.route('/:studentId')
     })
     .catch((err)=> next(err));
 })
-.post(cors.corsWithOptions,(req,res, next)=>{
+.post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,(req,res, next)=>{
     res.statusCode = 403;
     res.end('POST operation not supported on /students/' + req.params.studentId);
 })
-.put(cors.corsWithOptions,(req, res, next)=>{
+.put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     console.log(req.body)
     Students.findByIdAndUpdate(req.params.studentId, {
         $set: req.body
@@ -140,7 +142,7 @@ studentRouter.route('/:studentId')
     .catch((err)=> next(err));
    
 })
-.delete(cors.corsWithOptions, (req, res, next) =>{
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) =>{
     Students.findByIdAndRemove(req.params.studentId)
     .then((resp)=>{
         res.statusCode = 200;

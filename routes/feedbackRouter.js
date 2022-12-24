@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser =require('body-parser');
 const cors = require('./cors');
-
+const authenticate = require('../authenticate');
 const Feedbacks = require('../models/feedbacks');
 
 const feedbackRouter = express.Router();
@@ -73,7 +73,7 @@ feedbackRouter.route('/')
         
       }
 })
-.post(cors.corsWithOptions,(req, res, next)=>{
+.post(cors.corsWithOptions, (req, res, next)=>{
     Feedbacks.create(req.body)
     .then((feedback)=>{
         res.statusCode = 200;
@@ -82,11 +82,11 @@ feedbackRouter.route('/')
     })
     .catch((err)=> next(err));
 })
-.put(cors.corsWithOptions,(req, res, next)=>{
+.put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     res.statusCode = 403;
     res.end("PUT operation not supported on /feedbacks");
 })
-.delete(cors.corsWithOptions,(req, res, next)=>{
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     let arrayId =  JSON.parse(req.query.filter).id;
      for(let id of arrayId){
         Feedbacks.findByIdAndRemove(id)
@@ -117,11 +117,11 @@ feedbackRouter.route('/:feedbackId')
     })
     .catch((err)=> next(err));
 })
-.post(cors.corsWithOptions,(req,res, next)=>{
+.post(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req,res, next)=>{
     res.statusCode = 403;
     res.end('POST operation not supported on /feedbacks/' + req.params.feedbackId);
 })
-.put(cors.corsWithOptions,(req, res, next)=>{
+.put(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     Feedbacks.findByIdAndUpdate(req.params.feedbackId, {
         $set: req.body
     }, {new: true})
@@ -135,7 +135,7 @@ feedbackRouter.route('/:feedbackId')
     })
     .catch((err)=> next(err));
 })
-.delete(cors.corsWithOptions, (req, res, next) =>{
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) =>{
     Feedbacks.findByIdAndRemove(req.params.feedbackId)
     .then((resp)=>{
         res.statusCode = 200;

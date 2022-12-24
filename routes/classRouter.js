@@ -1,9 +1,10 @@
 const express = require('express');
 const bodyParser =require('body-parser');
 const cors = require('./cors');
-
+const authenticate = require('../authenticate');
 const Classes = require('../models/classes');
-const { query } = require('express');
+
+const Programs = require('../models/programs');
 
 const classRouter = express.Router();
 
@@ -35,7 +36,6 @@ classRouter.route('/')
             res.json(classes)
         }).catch(err => next(err))
     } else {
-        console.log("so here")
         let searchQ = JSON.parse(req.query.filter);
         let rangeFilter = JSON.parse(req.query.range);
         let sortF = JSON.parse(req.query.sort);
@@ -46,21 +46,39 @@ classRouter.route('/')
         .then((classes)=>{
             if(searchQ.q){      //support for search
                 let search = searchQ.q.toLowerCase();
-                let preMatched = classes;
-                if(searchQ.id) {
-                    let searchId = searchQ.id.toLowerCase();  
-                    preMatched = classes.filter(classs =>classs.id.toLowerCase().includes(searchId));
-                 }
-                const matched = preMatched.filter(classs =>classs.name.toLowerCase().includes(search));
-                 
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.setHeader('Content-Range', `matched 0 - 10 /${matched.length}`);
-                res.setHeader('Access-Control-Expose-Headers', 'Content-Range');
-                matched.sort((p1,p2)=>{
-                    if(sortF[1] === "ASC") return p1[sortF[0]].localeCompare(p2[sortF[0]]);
-                                        else return p2[sortF[0]].localeCompare(p1[sortF[0]]); });
-                res.json(matched.slice(rangeFilter[0],rangeFilter[1]));
+                
+                //first find each program by name and convert to program.id
+                let chosenProgram ;
+                Programs.find({})
+                .then((programs)=>{
+                    chosenProgram=(programs.find(program =>program.name.toLowerCase().includes(search)));
+            
+                }).then(()=>{
+                    console.log("the length ")
+                    let programId = 1111;
+                    if(chosenProgram){
+                        programId = JSON.stringify(chosenProgram._id);
+                    }   
+                    
+
+                    let preMatched = classes;
+                    if(searchQ.id) {
+                        let searchId = searchQ.id.toLowerCase();  
+                        preMatched = classes.filter(classs =>classs.id.toLowerCase().includes(searchId));
+                    }
+                    const matched = preMatched.filter(classs =>JSON.stringify(classs.program) === programId);
+                    //const matched = classes;
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.setHeader('Content-Range', `matched 0 - 10 /${matched.length}`);
+                    res.setHeader('Access-Control-Expose-Headers', 'Content-Range');
+                    matched.sort((p1,p2)=>{
+                        if(sortF[1] === "ASC") return p1[sortF[0]].localeCompare(p2[sortF[0]]);
+                                            else return p2[sortF[0]].localeCompare(p1[sortF[0]]); });
+                    res.json(matched.slice(rangeFilter[0],rangeFilter[1]));
+                    })
+                    .catch(err => console.log(err));
+                                
             }else{
                 console.log(classes.length);            
                 res.statusCode = 200;
@@ -76,7 +94,7 @@ classRouter.route('/')
         
       }
 })
-.post(cors.corsWithOptions,(req, res, next)=>{
+.post(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     //remove duplicate sutdent ids
     console.log(req.body)
     let mySet = new Set()
@@ -98,11 +116,11 @@ classRouter.route('/')
     .catch((err)=> next(err));
     
 })
-.put(cors.corsWithOptions,(req, res, next)=>{
+.put(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     res.statusCode = 403;
     res.end("PUT operation not supported on /classes");
 })
-.delete(cors.corsWithOptions,(req, res, next)=>{
+.delete(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     let arrayId =  JSON.parse(req.query.filter).id;
      for(let id of arrayId){
         Classes.findByIdAndRemove(id)
@@ -133,11 +151,11 @@ classRouter.route('/:classId')
     })
     .catch((err)=> next(err));
 })
-.post(cors.corsWithOptions,(req,res, next)=>{
+.post(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req,res, next)=>{
     res.statusCode = 403;
     res.end('POST operation not supported on /classes/' + req.params.classId);
 })
-.put(cors.corsWithOptions,(req, res, next)=>{
+.put(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     console.log(req.body)
     Classes.findByIdAndUpdate(req.params.classId, {
         $set: req.body
@@ -153,7 +171,7 @@ classRouter.route('/:classId')
     .catch((err)=> next(err));
    
 })
-.delete(cors.corsWithOptions, (req, res, next) =>{
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) =>{
     Classes.findByIdAndRemove(req.params.classId)
     .then((resp)=>{
         res.statusCode = 200;

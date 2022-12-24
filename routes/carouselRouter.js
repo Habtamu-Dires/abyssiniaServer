@@ -3,6 +3,7 @@ const bodyParser =require('body-parser');
 const cors = require('./cors');
 const multer = require('multer');
 const fs = require('fs');
+const authenticate = require('../authenticate');
 
 //imageUpload
 const storage = multer.diskStorage({
@@ -95,7 +96,7 @@ carouselRouter.route('/')
     }
     
 })
-.post(cors.corsWithOptions,upload.single('imageFile'),(req, res, next)=>{
+.post(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,upload.single('imageFile'),(req, res, next)=>{
     
     //post without image should be disalled image required is true.
     let data;
@@ -116,11 +117,11 @@ carouselRouter.route('/')
     })
     .catch((err)=> next(err));
 })
-.put(cors.corsWithOptions,(req, res, next)=>{
+.put(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     res.statusCode = 403;
     res.end("PUT operation not supported on /carousels");
 })
-.delete(cors.corsWithOptions,(req, res, next)=>{
+.delete(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     
     let arrayId =  JSON.parse(req.query.filter).id;
      for(let id of arrayId){
@@ -154,11 +155,11 @@ carouselRouter.route('/:carouselId')
     })
     .catch((err)=> next(err));
 })
-.post(cors.corsWithOptions,(req,res, next)=>{
+.post(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req,res, next)=>{
     res.statusCode = 403;
     res.end('POST operation not supported on /carousels/' + req.params.carouselId);
 })
-.put(cors.corsWithOptions,upload.single('imageFile'),(req, res, next)=>{
+.put(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,upload.single('imageFile'),(req, res, next)=>{
     
     let data;
     if(req.file){
@@ -193,7 +194,7 @@ carouselRouter.route('/:carouselId')
     })
     .catch((err)=> next(err));
 })
-.delete(cors.corsWithOptions,(req, res, next)=>{
+.delete(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
 
     //also delete the image
     data = JSON.parse(req.body.datas);
