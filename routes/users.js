@@ -5,7 +5,6 @@ var passport = require('passport');
 var authenticate = require('../authenticate');
 var cors = require('./cors');
 
-
 var router = express.Router();
 
 router.use(bodyParser.json());
@@ -31,10 +30,8 @@ router.post('/signup', cors.corsWithOptions, (req,res,next)=>{
         res.setHeader('Content-Type', 'application/json');
         res.json({err: err});
      } else {
-        if(req.body.firstname)
-          user.firstname = req.body.firstname
-        if(req.body.lastname)
-          user.lastname = req.body.lastname
+        if(req.body.name)
+          user.name = req.body.name
         user.save((err,user)=>{
           if(err) {
             res.statusCode = 500;
@@ -52,9 +49,36 @@ router.post('/signup', cors.corsWithOptions, (req,res,next)=>{
   });
 });
 
-router.put('/update', authenticate.verifyUser, cors.corsWithOptions, (req, res, next)=>{
-
-})
+router.put('/update', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+ 
+  console.log(req.body)
+  
+  User.findByIdAndUpdate(req.user._id, {
+      $set: req.body
+  }, {new: true})
+  .then((user)=>{
+      console.log(user)
+      User.findById(user._id)
+      .then((user)=>{
+          user.changePassword(req.body.oldpassword, req.body.newpassword, function(err){
+            if(err) {
+                  if(err.name === 'IncorrectPasswordError'){
+                       res.json({ success: false, message: 'Incorrect password' }); // Return error
+                  }else {
+                      res.json({ success: false, message: 'Something went wrong!! Please try again after sometimes.' });
+                  }
+           } else {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json({ success: true, message: 'Your password has been changed successfully' });
+            }
+          })
+                    
+      },(err)=> next(err))
+  })
+  .catch((err)=> next(err));
+  
+});
 
 //the passport.authenticate('local ) will load up user prop on request message
 router.post('/login', cors.corsWithOptions,(req,res, next)=>{
@@ -80,7 +104,7 @@ router.post('/login', cors.corsWithOptions,(req,res, next)=>{
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
       res.json({success: true, status: 'Login Successful!', token: token, 
-                  creds:{username: user.username, firstname:user.firstname, lastname: user.lastname}});
+                  creds:{username: user.username, name: user.name}});
     }); 
   }) (req, res, next);
 });

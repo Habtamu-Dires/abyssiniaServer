@@ -127,7 +127,7 @@ studentRouter.route('/:studentId')
     res.end('POST operation not supported on /students/' + req.params.studentId);
 })
 .put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
-    console.log(req.body)
+    
     Students.findByIdAndUpdate(req.params.studentId, {
         $set: req.body
     }, {new: true})
