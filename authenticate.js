@@ -15,7 +15,7 @@ passport.deserializeUser(User.deserializeUser());
 exports.getToken = function(user) {
     //inside jwt.sign(pay_load)
     // to create jwt usig jwt  //we imported                                                              
-    return jwt.sign(user, config.secretKey, {expiresIn: '1m'}); //expiresIn: 3600
+    return jwt.sign(user, config.secretKey, {expiresIn: '43200m'}); //expiresIn: 30 days
 };
 
 var opts = {};
@@ -35,6 +35,7 @@ exports.jwtPassport = passport.use(new JwtStrategy(opts,
             }
             else if(user) {
                 // passport will pass to ur strategy. req.user
+                
                 return done(null, user); 
             }
             else {
