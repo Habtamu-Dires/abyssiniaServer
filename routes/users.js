@@ -22,7 +22,7 @@ router.get('/',authenticate.verifyUser, authenticate.verifyAdmin, function(req, 
 });
 
 //temp
-router.post('/signup', cors.corsWithOptions, (req,res,next)=>{
+router.post('/signup', cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin, (req,res,next)=>{
   User.register(new User({username: req.body.username}), req.body.password, 
   (err, user)=>{
      if(err) {
@@ -111,7 +111,7 @@ router.post('/login', cors.corsWithOptions,(req,res, next)=>{
 
 
 //temp
-router.delete('/',authenticate.verifyUser, authenticate.verifyAdmin, (req,res,next)=> {
+router.delete('/',cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin, (req,res,next)=> {
   User.remove({})
   .then((resp)=>{
       res.statusCode = 200;

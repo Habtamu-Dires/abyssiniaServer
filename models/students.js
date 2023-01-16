@@ -40,10 +40,10 @@ const StudentSchema = new Schema({
         type:String,
     },
     programStartDate: {
-        type:String,
+        type:Date,
     },
     programEndDate: {
-        type: String,
+        type: Date,
     },
     certificateStatus:{
         type: Boolean,

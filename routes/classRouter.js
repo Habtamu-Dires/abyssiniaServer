@@ -66,6 +66,38 @@ classRouter.route('/')
                         let searchId = searchQ.id.toLowerCase();  
                         preMatched = classes.filter(classs =>classs.id.toLowerCase().includes(searchId));
                     }
+                    if(searchQ.id) {
+                        let searchId = searchQ.id.toLowerCase();  
+                        preMatched = classes.filter(clas =>clas.id.toLowerCase().includes(searchId));
+                     }
+                    if(searchQ.program){
+                        let searchedPorgram = searchQ.program;    
+                        preMatched = classes.filter(clas => clas.program == searchedPorgram);
+                    }
+                    if(searchQ.classStartDate){
+                        let date = new Date(searchQ.classStartDate);
+                        let month = date.getMonth()
+                        let year = date.getFullYear();            
+                        preMatched = classes.filter(clas => 
+                            clas.classStartDate.getMonth() === month && clas.classStartDate.getFullYear() === year);
+                    }
+                    if(searchQ.classEndDate){
+                        let date = new Date(searchQ.classEndDate);
+                        let month = date.getMonth()
+                        let year = date.getFullYear();            
+                        preMatched = classes.filter(clas =>{
+                            try{
+                                if(clas.classEndDate.getMonth() === month && clas.classEndDate.getFullYear() === year){
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            } catch(err){
+                                return false;        
+                            }
+                        } );
+                            
+                    }
                     const matched = preMatched.filter(classs =>JSON.stringify(classs.program) === programId);
                     //const matched = classes;
                     res.statusCode = 200;

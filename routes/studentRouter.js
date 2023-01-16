@@ -49,6 +49,61 @@ studentRouter.route('/')
                     let searchId = searchQ.id.toLowerCase();  
                     preMatched = students.filter(student =>student.id.toLowerCase().includes(searchId));
                  }
+                if(searchQ.program){
+                    let searchedPorgram = searchQ.program;    
+                    preMatched = students.filter(student => student.program == searchedPorgram);
+                }
+                if(searchQ.enrolled) {
+                    let searchedEnrollment = JSON.parse(searchQ.enrolled.toLowerCase());    
+                    console.log( searchedEnrollment);
+                    preMatched = students.filter(student => student.enrolled === searchedEnrollment)
+                }
+                if(searchQ.certificateStatus) {
+                    let searchedCertificate = JSON.parse(searchQ.certificateStatus.toLowerCase());
+                    preMatched = students.filter(student => student.certificateStatus === searchedCertificate)
+                }
+                if(searchQ.createdAt){
+                    let date = new Date(searchQ.createdAt);
+                    let month = date.getMonth()
+                    let year = date.getFullYear();            
+                    preMatched = students.filter(student => 
+                        student.createdAt.getMonth() === month && student.createdAt.getFullYear() === year);
+                }
+                if(searchQ.programStartDate){
+                    let date = new Date(searchQ.programStartDate);
+                    let month = date.getMonth()
+                    let year = date.getFullYear();            
+                    preMatched = students.filter(student => {
+                        try{
+                            if(student.programStartDate.getMonth() === month && student.programStartDate.getFullYear() === year){
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        } catch(err) {                            
+                            return false;
+                        } 
+                     }
+                    );
+                }
+                if(searchQ.programEndDate){
+                    let date = new Date(searchQ.programEndDate);
+                    let month = date.getMonth()
+                    let year = date.getFullYear();            
+                    preMatched = students.filter(student =>{ 
+                        try{
+                            if(student.programEndDate.getMonth() === month && student.programEndDate.getFullYear() === year){
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        } catch(err) {
+                            return false;
+                        }
+                        
+                      }
+                    );
+                }
                 const matched = preMatched.filter(student =>student.name.toLowerCase().includes(search));
                  
                 res.statusCode = 200;
