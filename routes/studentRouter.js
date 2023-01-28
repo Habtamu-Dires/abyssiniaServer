@@ -197,7 +197,7 @@ studentRouter.route('/:studentId')
     .catch((err)=> next(err));
    
 })
-.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) =>{
+.delete(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) =>{
     Students.findByIdAndRemove(req.params.studentId)
     .then((resp)=>{
         res.statusCode = 200;

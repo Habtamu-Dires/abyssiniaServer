@@ -5,13 +5,17 @@ var passport = require('passport');
 var authenticate = require('../authenticate');
 var cors = require('./cors');
 
+var nodemailer = require('nodemailer');
+var handlebars = require('handlebars');
+
+
 var router = express.Router();
 
 router.use(bodyParser.json());
 
 /* GET users listing. */
 router.options('*', cors.corsWithOptions, (req, res)=>{res.sendStatus(200);});
-router.get('/',authenticate.verifyUser, authenticate.verifyAdmin, function(req, res, next) {
+router.get('/',cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,function(req, res, next) {
     User.find({})
     .then((users)=>{
       res.statusCode = 200;
@@ -22,7 +26,7 @@ router.get('/',authenticate.verifyUser, authenticate.verifyAdmin, function(req, 
 });
 
 //temp
-router.post('/signup', cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin, (req,res,next)=>{
+router.post('/signup', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, function(req,res,next){
   User.register(new User({username: req.body.username}), req.body.password, 
   (err, user)=>{
      if(err) {
@@ -32,6 +36,8 @@ router.post('/signup', cors.corsWithOptions,authenticate.verifyUser, authenticat
      } else {
         if(req.body.name)
           user.name = req.body.name
+        if(req.body.email)
+          user.email = req.body.email
         user.save((err,user)=>{
           if(err) {
             res.statusCode = 500;
@@ -51,8 +57,6 @@ router.post('/signup', cors.corsWithOptions,authenticate.verifyUser, authenticat
 
 router.put('/update', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
  
-  console.log(req.body)
-  
   User.findByIdAndUpdate(req.user._id, {
       $set: req.body
   }, {new: true})
@@ -100,18 +104,18 @@ router.post('/login', cors.corsWithOptions,(req,res, next)=>{
         return;          
       }
 
-      var token = authenticate.getToken({_id: req.user._id});
+      const token = authenticate.getToken({_id: req.user._id});
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
       res.json({success: true, status: 'Login Successful!', token: token, 
-                  creds:{username: user.username, name: user.name}});
+                  creds:{username: user.username, name: user.name, email: user.email}});
     }); 
   }) (req, res, next);
 });
 
 
 //temp
-router.delete('/',cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin, (req,res,next)=> {
+router.delete('/',cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req,res,next)=> {
   User.remove({})
   .then((resp)=>{
       res.statusCode = 200;
@@ -121,7 +125,6 @@ router.delete('/',cors.corsWithOptions,authenticate.verifyUser, authenticate.ver
   .catch((err)=>next(err));
 
 });
-
 
 //will it check the expire time , how i'm gonna use this ...??
 router.get('/checkJWTToken', cors.corsWithOptions, (req,res)=>{
@@ -142,6 +145,87 @@ router.get('/checkJWTToken', cors.corsWithOptions, (req,res)=>{
   }) (req, res);
 });
 
+
+//forget password request
+router.post('/forgetPassword', cors.corsWithOptions,  async (req, res, next) => {
+  const email = req.body.email;
+  const user = await User.findOne({email})
+  
+  if(!user) {
+    res.statusCode = 402;
+    res.setHeader('Content-Type', 'application/json')
+    return res.json({status: 'User does not exist'})
+  }
+  else{
+    const resetToken = authenticate.getToken({_id: user._id});
+
+    const clientURL = 'http://localhost:3001';
+    const link = `${clientURL}/resetPassword?token=${resetToken}&id=${user._id}`;
+    const source = `<h3>Hello, {{name}}</h3><br/>
+                    <h4>You requested to reset your Abyssinia password</h4> 
+                    <h4>Please, click the link below to reset your password</h4>
+                    <a href='{{link}}'>Reset Password</a><br />
+                    <p>Ignore this message if it was not you.</p>`;
+    const template = handlebars.compile(source);
+    const data = {"name": user.name,
+                  "link": link}
+    
+    const thehtml = template(data);
+    //send email
+
+    var transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'haft.adu@gmail.com',
+        pass: 'your password here'  //do not push this email application password
+      }
+    });
+
+    var mailoptions = {
+      from: 'haft.adu@gmail.com',
+      to: user.email,
+      subject: 'A link to rese your abyssinia password',
+      html: thehtml
+    };
+
+    transporter.sendMail(mailoptions, function(error, info){
+      if(error){
+        res.statusCode = 403;
+        res.setHeader('Content-Type', 'application/json')
+        return res.json({status: `${error}`})
+
+      } else {
+        
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json')
+        return res.json({status: `Email sent to: ${user.email}`})
+      }
+    });
+
+  }
+  
+});
+
+//Reset password request
+router.put('/resetPassword', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+  console.log(req.body.userId);
+  
+  User.findById(req.body.userId)
+  .then(user => {
+      user.setPassword(req.body.newpassword, ()=>{
+      user.save();
+
+      const token = authenticate.getToken({_id: req.user._id});
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json({success: true, status: 'password reset successful', token: token, 
+                  creds:{username: user.username, name: user.name, email: user.email}})      
+    });
+    
+  })
+  .catch(err => next(err))
+  
+});
 
 
 module.exports = router;
