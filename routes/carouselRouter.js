@@ -5,24 +5,11 @@ const multer = require('multer');
 const fs = require('fs');
 const authenticate = require('../authenticate');
 
-//imageUpload
-const storage = multer.diskStorage({
-    destination: (req, file, cb) =>{
-        cb(null, 'public/images');
-    },
-    filename:(req, file, cb)=>{
-        cb(null, file.originalname);
-    }
-});
 
-const imageFileFilter = (req, file, cb)=>{
-    if(!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-        return cb(new Error('You can upload only image files!'), false);
-    }
-    cb(null, true);
-};
+//cloudinary image upload with multer
+const {multerUploads, dataUri, fileName}  = require('../multer');
+const cloudinary = require('cloudinary').v2
 
-const upload = multer({storage: storage, fileFilter: imageFileFilter});
 
 //normal
 const Carousels = require('../models/carouselItems');
@@ -96,26 +83,37 @@ carouselRouter.route('/')
     }
     
 })
-.post(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,upload.single('imageFile'),(req, res, next)=>{
+.post(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,multerUploads,(req, res, next)=>{
     
-    //post without image should be disalled image required is true.
-    let data;
-    if(req.file){
-        let imagePath = req.file.path;
-        imagePath =imagePath.replace('public/','');
-        data = JSON.parse(req.body.datas);
-        data.image = imagePath;
-    } else {
-        data = JSON.parse(req.body.datas);
+    //post without image should be disabled image required is true.
+    const data = JSON.parse(req.body.datas)
+    if(req.file) {
+        const file = dataUri(req).content;
+        const file_name = fileName(req);
+        cloudinary.uploader.upload(file, {public_id: file_name ,folder: 'abyssinia'})
+          .then((result)=>{ 
+            data.image_url = result.url;
+            data.image_name = result.public_id;
+            Carousels.create(data)
+            .then((carousel)=>{
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(carousel)
+            })
+            .catch((err)=> next(err));
+            
+          })
+          .catch(err => next(err))    
+    } else{
+        Carousels.create(data)
+        .then((carousel)=>{
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.json(carousel)
+        })
+        .catch((err)=> next(err));
     }
     
-    Carousels.create(data)
-    .then((carousel)=>{
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json(carousel)
-    })
-    .catch((err)=> next(err));
 })
 .put(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
     res.statusCode = 403;
@@ -127,7 +125,9 @@ carouselRouter.route('/')
      for(let id of arrayId){
         Carousels.findByIdAndRemove(id)
         .then(res=>{
-            console.log(" ");
+            return cloudinary.uploader.destroy(res.image_name, {public_id: res.image_name}, function(error, result){
+                console.log(result, error);
+            })
         })
         .catch(err => console.log(err));
     }
@@ -159,53 +159,62 @@ carouselRouter.route('/:carouselId')
     res.statusCode = 403;
     res.end('POST operation not supported on /carousels/' + req.params.carouselId);
 })
-.put(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,upload.single('imageFile'),(req, res, next)=>{
+.put(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,multerUploads,(req, res, next)=>{
     
-    let data;
+    const data = JSON.parse(req.body.datas)
+    const oldImage = data.image_name;
+    
     if(req.file){
-        let imagePath = req.file.path;
-        imagePath =imagePath.replace('public/','');
-        data = JSON.parse(req.body.datas);
-        console.log(data.image);
-        let path = data.image;
-        //if it is not the same image then delete
-        if(imagePath !== path){
-            fs.unlink('public/'+path, (err)=>{
-                if(err) console.error(err);
-                else console.log('public/'+path, 'was deleted');
+        const file = dataUri(req).content;
+        const file_name = fileName(req);
+        cloudinary.uploader.upload(file, {public_id: file_name ,folder: 'abyssinia'})
+          .then((result)=>{         
+            data.image_url = result.url;
+            data.image_name = result.public_id;
+            Carousels.findByIdAndUpdate(req.params.carouselId, {
+                $set:  data  //req.body
+            }, {new: true})
+            .then((carousel)=>{
+                Carousels.findById(carousel.id)
+                .then((carousel)=>{
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.json(carousel);
+                },(err)=> next(err))                 
             })
-        }         
-                
-        data.image = imagePath;
-    } else {
-        data = JSON.parse(req.body.datas);
-    }
-    
-    Carousels.findByIdAndUpdate(req.params.carouselId, {
-        $set:  data  //req.body
-    }, {new: true})
-    .then((carousel)=>{
-        Carousels.findById(carousel.id)
+            .catch((err)=> next(err));            
+          }) //then delete the old one
+          .then(()=> {
+            if(oldImage !== data.image_name) {
+              return cloudinary.uploader.destroy(oldImage, {public_id: oldImage}, function(error, result){
+                   console.log(result, error);
+               })
+            } else return;
+          })
+          .catch(err => next(err))  
+
+    } else{
+        Carousels.findByIdAndUpdate(req.params.carouselId, {
+            $set:  data  //req.body
+        }, {new: true})
         .then((carousel)=>{
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            res.json(carousel);
-        },(err)=> next(err))
-    })
-    .catch((err)=> next(err));
+            Carousels.findById(carousel.id)
+            .then((carousel)=>{
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(carousel);
+            },(err)=> next(err))                 
+        })
+        .catch((err)=> next(err)); 
+    }
+
+    
 })
 .delete(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{
 
-    //also delete the image
     data = JSON.parse(req.body.datas);
-    console.log(data.image);
-    let path = data.image;
-    //delete old image         
-    fs.unlink('public/'+path, (err)=>{
-        if(err) console.error(err);
-        else console.log(path, 'was deleted');
-    })
-
+    const oldImage = data.image_name;
+    
     //delete the program
     Carousels.findByIdAndRemove(req.params.carouselId)
     .then((resp)=>{
@@ -213,6 +222,10 @@ carouselRouter.route('/:carouselId')
         res.setHeader('Content-Type', 'application/json');
         res.json(resp);
     })
+    //then delete the old one
+    .then(()=> cloudinary.uploader.destroy(oldImage, {public_id: oldImage}, function(error, result){
+        console.log(result, error);
+    }))
     .catch((err)=>next(err));
 })
 

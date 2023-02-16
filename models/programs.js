@@ -18,8 +18,11 @@ const programSchema = new Schema({
         required: true,
         unique: true
     },
-    image: {
+    image_name: {
         type:String,
+    },
+    image_url:{
+        type: String,
     },
     description: {
         type: String,

@@ -3,8 +3,10 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var config = require('./config');
 var passport = require('passport');
+var cloudinaryConfig = require('./cloudinaryConfig')
+require('dotenv').config();
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -17,14 +19,31 @@ var stuffRouter = require('./routes/stuffRouter');
 
 const mongoose = require('mongoose');
 
+//mongodb atalas
+const uri = process.env.Mongodb_Atlast_Url;
+const connectionParams={
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}
 
-const url = config.mongoUrl;
+const connect = mongoose.connect(uri, connectionParams);
+//connect with the mongoDB
+connect.then((db)=>{
+  console.log("Connected correctly to server");
+},(err)=>{console.log(err); });
+
+
+/*
+//local mongodb 
+const url = process.env.MongoUrl;
+
 const connect = mongoose.connect(url);
 //connect with the mongoDB
 connect.then((db)=>{
   console.log("Connected correctly to server");
 },(err)=>{console.log(err); });
 
+*/
 var app = express();
 
 // view engine setup
@@ -39,6 +58,9 @@ app.use(express.urlencoded({ extended: false }));
 //initialize passport
 app.use(passport.initialize());
 
+//cloudinary
+app.use(cloudinaryConfig)
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
@@ -49,7 +71,8 @@ app.use('/students', studentRouter);
 app.use('/carousels', carouselRouter);
 app.use('/feedbacks', feedbackRouter);
 app.use('/classes', classRouter);
-app.use('/stuffs', stuffRouter)
+app.use('/stuffs', stuffRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

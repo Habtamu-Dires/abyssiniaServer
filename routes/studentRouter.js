@@ -129,15 +129,25 @@ studentRouter.route('/')
         
       }
 })
-.post(cors.corsWithOptions, (req, res, next)=>{
+.post(cors.corsWithOptions, async (req, res, next)=>{
     
-    Students.create(req.body)
-    .then((student)=>{
+    const name = req.body.name;
+    const phone = req.body.phone;
+    const theStudent = await Students.findOne({name, phone});
+    if(!theStudent){
+        Students.create(req.body)
+        .then((student)=>{
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.json(student)
+        })
+        .catch((err)=> next(err));
+    } else{
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-        res.json(student)
-    })
-    .catch((err)=> next(err));
+        res.json(theStudent)
+    }
+    
     
 })
 .put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=>{

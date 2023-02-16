@@ -11,7 +11,10 @@ const CarouselSchema = new Schema({
     sub_title: {
         type:String
     },
-    image: {
+    image_name: {
+        type: String
+    },
+    image_url:{
         type: String
     },},{
         timestamps: true

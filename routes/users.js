@@ -4,10 +4,9 @@ var User = require('../models/user');
 var passport = require('passport');
 var authenticate = require('../authenticate');
 var cors = require('./cors');
-
+require('dotenv').config();
 var nodemailer = require('nodemailer');
 var handlebars = require('handlebars');
-
 
 var router = express.Router();
 
@@ -15,7 +14,7 @@ router.use(bodyParser.json());
 
 /* GET users listing. */
 router.options('*', cors.corsWithOptions, (req, res)=>{res.sendStatus(200);});
-router.get('/',cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,function(req, res, next) {
+router.get('/' ,cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin ,function(req, res, next) {
     User.find({})
     .then((users)=>{
       res.statusCode = 200;
@@ -26,7 +25,7 @@ router.get('/',cors.corsWithOptions, authenticate.verifyUser, authenticate.verif
 });
 
 //temp
-router.post('/signup', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, function(req,res,next){
+router.post('/signup' ,cors.corsWithOptions,/* authenticate.verifyUser, authenticate.verifyAdmin,*/ function(req,res,next){
   User.register(new User({username: req.body.username}), req.body.password, 
   (err, user)=>{
      if(err) {
@@ -176,8 +175,8 @@ router.post('/forgetPassword', cors.corsWithOptions,  async (req, res, next) => 
     var transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'haft.adu@gmail.com',
-        pass: 'your password here'  //do not push this email application password
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
       }
     });
 
