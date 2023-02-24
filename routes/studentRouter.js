@@ -46,34 +46,92 @@ studentRouter.route('/')
                 let search = searchQ.q.toLowerCase();
                 let preMatched = students;
                 if(searchQ.id) {
-                    let searchId = searchQ.id.toLowerCase();  
-                    preMatched = students.filter(student =>student.id.toLowerCase().includes(searchId));
+                    let searchId = searchQ.id.toLowerCase();
+                    if(preMatched.length === students.length)  
+                        preMatched = students.filter(student =>student.id.toLowerCase().includes(searchId));
+                    else
+                        preMatched = preMatched.filter(student =>student.id.toLowerCase().includes(searchId));
+
                  }
                 if(searchQ.program){
-                    let searchedPorgram = searchQ.program;    
-                    preMatched = students.filter(student => student.program == searchedPorgram);
+                    let searchedPorgram = searchQ.program; 
+                    if(preMatched.length === students.length)   
+                        preMatched = students.filter(student => student.program == searchedPorgram);
+                    else
+                        preMatched = preMatched.filter(student => student.program == searchedPorgram);
+                }
+                if(searchQ.preferredDays) {
+                    let searchedDays = searchQ.preferredDays;
+                    if(preMatched.length === students.length)
+                        preMatched = students.filter(student => student.preferredDays == searchedDays)
+                    else 
+                        preMatched = preMatched.filter(student => student.preferredDays == searchedDays)
+                }
+                if(searchQ.preferredTime) {
+                    let searchedTime = searchQ.preferredTime;
+                    if(preMatched.length === students.length)
+                        preMatched = students.filter(student => student.preferredTime == searchedTime)
+                    else
+                        preMatched = preMatched.filter(student => student.preferredTime == searchedTime)
+
                 }
                 if(searchQ.enrolled) {
                     let searchedEnrollment = JSON.parse(searchQ.enrolled.toLowerCase());    
-                    console.log( searchedEnrollment);
-                    preMatched = students.filter(student => student.enrolled === searchedEnrollment)
+                    if(preMatched.length === students.length)
+                        preMatched = students.filter(student => student.enrolled === searchedEnrollment)
+                    else
+                        preMatched = preMatched.filter(student => student.enrolled === searchedEnrollment)
                 }
                 if(searchQ.certificateStatus) {
                     let searchedCertificate = JSON.parse(searchQ.certificateStatus.toLowerCase());
-                    preMatched = students.filter(student => student.certificateStatus === searchedCertificate)
+                    if(preMatched.length === students.length)
+                        preMatched = students.filter(student => student.certificateStatus === searchedCertificate)
+                    else
+                        preMatched = preMatched.filter(student => student.certificateStatus === searchedCertificate)
+                }
+                if(searchQ.phone){
+                    console.log(searchQ.phone)
+                    let searchedPhone = searchQ.phone;
+                    if(preMatched.length === students.length)
+                        preMatched = students.filter(student => student.phone === searchedPhone)
+                    else
+                        preMatched = preMatched.filter(student => student.phone === searchedPhone)
+                }
+                if(searchQ.gender){
+                    let searchedGender = searchQ.gender;
+                    if(preMatched.length === students.length)
+                        preMatched = students.filter(student => student.gender == searchedGender)
+                    else
+                        preMatched = preMatched.filter(student => student.gender == searchedGender)
+                }
+                if(searchQ.educationStatus){
+                    let searchedStatus = searchQ.educationStatus;
+                    if(preMatched.length === students.length)
+                        preMatched = students.filter(student => student.educationStatus == searchedStatus)
+                    else
+                        preMatched = preMatched.filter(student => student.educationStatus == searchedStatus)
                 }
                 if(searchQ.createdAt){
                     let date = new Date(searchQ.createdAt);
                     let month = date.getMonth()
-                    let year = date.getFullYear();            
-                    preMatched = students.filter(student => 
-                        student.createdAt.getMonth() === month && student.createdAt.getFullYear() === year);
+                    let year = date.getFullYear(); 
+                    if(preMatched.length === students.length)           
+                        preMatched = students.filter(student => student.createdAt.getMonth() === month && student.createdAt.getFullYear() === year);
+                    else
+                        preMatched = preMatched.filter(student => student.createdAt.getMonth() === month && student.createdAt.getFullYear() === year);
+
                 }
                 if(searchQ.programStartDate){
                     let date = new Date(searchQ.programStartDate);
                     let month = date.getMonth()
-                    let year = date.getFullYear();            
-                    preMatched = students.filter(student => {
+                    let year = date.getFullYear(); 
+                    let tempStudentsList;
+                    if(preMatched.length === students.length) {
+                            tempStudentsList = students;
+                    }  else {
+                        tempStudentsList = preMatched;
+                    }       
+                    preMatched = tempStudentsList.filter(student => {
                         try{
                             if(student.programStartDate.getMonth() === month && student.programStartDate.getFullYear() === year){
                                 return true;
@@ -89,8 +147,14 @@ studentRouter.route('/')
                 if(searchQ.programEndDate){
                     let date = new Date(searchQ.programEndDate);
                     let month = date.getMonth()
-                    let year = date.getFullYear();            
-                    preMatched = students.filter(student =>{ 
+                    let year = date.getFullYear();
+                    let tempStudentsList;
+                    if(preMatched.length === students.length){
+                        tempStudentsList = students;
+                    } else {
+                        tempStudentsList = preMatched;
+                    }         
+                    preMatched = tempStudentsList.filter(student =>{ 
                         try{
                             if(student.programEndDate.getMonth() === month && student.programEndDate.getFullYear() === year){
                                 return true;
