@@ -19,6 +19,7 @@ var stuffRouter = require('./routes/stuffRouter');
 
 const mongoose = require('mongoose');
 
+
 //mongodb atalas
 const uri = process.env.Mongodb_Atlast_Url;
 const connectionParams={
@@ -33,7 +34,6 @@ connect.then((db)=>{
 },(err)=>{console.log(err); });
 
 /*
-
 //local mongodb 
 const url = process.env.MongoUrl;
 
@@ -42,8 +42,8 @@ const connect = mongoose.connect(url);
 connect.then((db)=>{
   console.log("Connected correctly to server");
 },(err)=>{console.log(err); });
-
 */
+
 var app = express();
 
 // view engine setup
@@ -91,3 +91,4 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+
