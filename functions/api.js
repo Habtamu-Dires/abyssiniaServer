@@ -21,10 +21,9 @@ var classRouter = require('../routes/classRouter');
 var stuffRouter = require('../routes/stuffRouter');
 
 const mongoose = require('mongoose');
-const Mongodb_Atlast_Url = "mongodb+srv://hab:habatatlas@cluster0.5k8nzdj.mongodb.net/abyssinia?retryWrites=true&w=majority"
+const Mongodb_Atlast_Url = "mongodb+srv://hab:habatatlas@cluster0.5k8nzdj.mongodb.net/abyssinia?retryWrites=true&w=majority";
 //mongodb atalas
-const uri = Mongodb_Atlast_Url;//process.env.Mongodb_Atlast_Url;
-
+const uri = Mongodb_Atlast_Url; //process.env.Mongodb_Atlast_Url;
 const connectionParams={
   useNewUrlParser: true,
   useUnifiedTopology: true
