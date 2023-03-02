@@ -15,7 +15,6 @@
     "express": "~4.16.1",
     "handlebars": "^4.7.7",
     "http-errors": "~1.6.3",
-    "jade": "~1.11.0",
     "jsonwebtoken": "^8.3.0",
     "mongoose": "^6.7.1",
     "mongoose-currency": "^0.2.0",
