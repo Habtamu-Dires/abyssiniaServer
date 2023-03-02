@@ -23,7 +23,7 @@ exports.getToken = function(user) {
 var opts = {};
 //from where to extrac jwt
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();  
-opts.secretOrKey = process.env.Passport_SecretKey;  //old =  config.secretKey;
+opts.secretOrKey =  Passport_SecretKey;//process.env.Passport_SecretKey;  //old =  config.secretKey;
 
 
 //configering JWT based strategy
