@@ -10,7 +10,7 @@ feedbackRouter.use(bodyParser.json());
 
 feedbackRouter.route('/')
 .options(cors.corsWithOptions, (req,res)=>{res.sendStatus(200)})
-.get(cors.corsWithOptions, (req, res, next)=>{
+.get(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
     
     //get many in admin
     if(req.query.range === undefined){
@@ -108,7 +108,7 @@ feedbackRouter.route('/')
 //with id
 feedbackRouter.route('/:feedbackId')
 .options(cors.corsWithOptions, (req,res)=>{res.sendStatus(200)})
-.get(cors.cors,(req, res, next)=>{
+.get(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
     Feedbacks.findById(req.params.feedbackId)
     .then((feedback)=>{
         res.statusCode = 200;

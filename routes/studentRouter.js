@@ -10,7 +10,7 @@ studentRouter.use(bodyParser.json());
 
 studentRouter.route('/')
 .options(cors.corsWithOptions, (req,res)=>{res.sendStatus(200)})
-.get(cors.corsWithOptions, (req, res, next)=>{
+.get(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
     
     //to filter with request.filter from admin with id chnaged to _id
     if(req.query.range === undefined){
@@ -242,7 +242,7 @@ studentRouter.route('/')
 //with id
 studentRouter.route('/:studentId')
 .options(cors.corsWithOptions, (req,res)=>{res.sendStatus(200)})
-.get(cors.cors,(req, res, next)=>{
+.get(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
     Students.findById(req.params.studentId)
     .then((student)=>{
         res.statusCode = 200;

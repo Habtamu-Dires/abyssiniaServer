@@ -28,7 +28,7 @@ router.get('/' ,cors.corsWithOptions, authenticate.verifyUser, authenticate.veri
 });
 
 //temp
-router.post('/signup' ,cors.corsWithOptions,/* authenticate.verifyUser, authenticate.verifyAdmin,*/ function(req,res,next){
+router.post('/signup' ,cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, function(req,res,next){
   User.register(new User({username: req.body.username}), req.body.password, 
   (err, user)=>{
      if(err) {
