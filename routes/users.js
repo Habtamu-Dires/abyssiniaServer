@@ -161,7 +161,7 @@ router.post('/forgetPassword', cors.corsWithOptions,  async (req, res, next) => 
   else{
     const resetToken = authenticate.getToken({_id: user._id});
 
-    const clientURL = 'http://localhost:3001';
+    const clientURL = 'https://abyssinia-computer-engineering.netlify.app';
     const link = `${clientURL}/resetPassword?token=${resetToken}&id=${user._id}`;
     const source = `<h3>Hello, {{name}}</h3><br/>
                     <h4>You requested to reset your Abyssinia password</h4> 
@@ -186,7 +186,7 @@ router.post('/forgetPassword', cors.corsWithOptions,  async (req, res, next) => 
     var mailoptions = {
       from: 'haft.adu@gmail.com',
       to: user.email,
-      subject: 'A link to rese your abyssinia password',
+      subject: 'A link to reset your abyssinia password',
       html: thehtml
     };
 

@@ -2,8 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-const whitelist =['http://localhost:3000', 'http://localhost:3001', 
-                    'http://localhost:3002'];
+const whitelist =['https://abyssinia-computer-engineering.netlify.app'];
 
 var corsOptionsDelegate = (req, callback) => {
     var corsOptions;
@@ -17,4 +16,4 @@ var corsOptionsDelegate = (req, callback) => {
 };
 
 exports.cors = cors();
-exports.corsWithOptions =  cors(); //cors(corsOptionsDelegate); //previous one
+exports.corsWithOptions = cors(corsOptionsDelegate); //previous one
