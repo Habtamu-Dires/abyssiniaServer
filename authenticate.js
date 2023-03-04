@@ -6,8 +6,6 @@ var ExtractJwt = require('passport-jwt').ExtractJwt;
 var jwt = require('jsonwebtoken');
 
 require('dotenv').config();
-//test
-const Passport_SecretKey = '12345-67890-09876-54321'
 
 //possport local strategy is based on username and password.
 exports.local = passport.use(new LocalStrategy(User.authenticate()));
@@ -17,13 +15,13 @@ passport.deserializeUser(User.deserializeUser());
 exports.getToken = function(user) {
     //inside jwt.sign(pay_load)
     // to create jwt usig jwt  //we imported                                                              
-    return jwt.sign(user, Passport_SecretKey /*process.env.Passport_SecretKey */, {expiresIn: '43200m'}); //expiresIn: 30 days
+    return jwt.sign(user, process.env.Passport_SecretKey , {expiresIn: '43200m'}); //expiresIn: 30 days
 };
 
 var opts = {};
 //from where to extrac jwt
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();  
-opts.secretOrKey =  Passport_SecretKey;//process.env.Passport_SecretKey;  //old =  config.secretKey;
+opts.secretOrKey = process.env.Passport_SecretKey;  //old =  config.secretKey;
 
 
 //configering JWT based strategy

@@ -10,7 +10,6 @@ require('dotenv').config();
 //netify
 const serverless = require('serverless-http');
 
-
 var indexRouter = require('../routes/index');
 var usersRouter = require('../routes/users');
 var programRouter = require('../routes/programRouter');
@@ -21,9 +20,10 @@ var classRouter = require('../routes/classRouter');
 var stuffRouter = require('../routes/stuffRouter');
 
 const mongoose = require('mongoose');
-const Mongodb_Atlast_Url = "mongodb+srv://hab:habatatlas@cluster0.5k8nzdj.mongodb.net/abyssinia?retryWrites=true&w=majority";
+
 //mongodb atalas
-const uri = Mongodb_Atlast_Url; //process.env.Mongodb_Atlast_Url;
+const uri = process.env.Mongodb_Atlast_Url;
+
 const connectionParams={
   useNewUrlParser: true,
   useUnifiedTopology: true

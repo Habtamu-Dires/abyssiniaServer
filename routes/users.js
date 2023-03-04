@@ -7,9 +7,6 @@ var cors = require('./cors');
 require('dotenv').config();
 var nodemailer = require('nodemailer');
 var handlebars = require('handlebars');
-//temp 
-const EMAIL = 'haft.adu@gmail.com';
-const EMAIL_PASSWORD = 'aupjfytpamjeaekg'
 
 var router = express.Router();
 
@@ -178,8 +175,8 @@ router.post('/forgetPassword', cors.corsWithOptions,  async (req, res, next) => 
     var transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: EMAIL,//process.env.EMAIL,
-        pass: EMAIL_PASSWORD //process.env.EMAIL_PASSWORD,
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
       }
     });
 
