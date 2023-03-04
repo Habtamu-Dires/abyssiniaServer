@@ -10,7 +10,7 @@ studentRouter.use(bodyParser.json());
 
 studentRouter.route('/')
 .options(cors.corsWithOptions, (req,res)=>{res.sendStatus(200)})
-.get(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.get(cors.corsWithOptions, (req, res, next)=>{
     
     //to filter with request.filter from admin with id chnaged to _id
     if(req.query.range === undefined){
