@@ -4,7 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var passport = require('passport');
-var cloudinaryConfig = require('./cloudinaryConfig')
+//var cloudinaryConfig = require('./cloudinaryConfig')
 require('dotenv').config();
 
 
@@ -59,7 +59,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(passport.initialize());
 
 //cloudinary
-app.use(cloudinaryConfig)
+//app.use(cloudinaryConfig)
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

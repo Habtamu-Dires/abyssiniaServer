@@ -8,7 +8,7 @@ const authenticate = require('../authenticate');
 
 //cloudinary image upload with multer
 const {multerUploads, dataUri, fileName}  = require('../multer');
-const cloudinary = require('cloudinary').v2
+const cloudinary = require('../cloudinaryConfig')
 
 
 //normal
